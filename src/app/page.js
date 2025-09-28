@@ -209,7 +209,7 @@ export default function Dashboard() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <Button className="bg-white text-gray-400 rounded-full sm:w-auto px-6 md:px-20 h-12 border">
-                SEE WHAT'S NEW
+                {"SEE WHAT'S NEW"}
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700  rounded-full w-full sm:w-auto px-6 md:px-20 h-12">
                 CREATE
