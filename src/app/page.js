@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,7 @@ export default function Dashboard() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged((user) => {
@@ -52,20 +52,22 @@ export default function Dashboard() {
   }, [router]);
 
   useEffect(() => {
-    if (user) {
-      loadData();
-      connect();
+    if (!user || hasLoaded) return;
 
-      const unsubscribe = onActivity((activity) => {
-        setActivities((prev) => [activity, ...prev.slice(0, 4)]);
-      });
+    loadData();
+    connect();
 
-      return () => {
-        unsubscribe();
-        disconnect();
-      };
-    }
-  }, [user]);
+    const unsubscribe = onActivity((activity) => {
+      setActivities((prev) => [activity, ...prev.slice(0, 4)]);
+    });
+
+    setHasLoaded(true);
+
+    return () => {
+      unsubscribe();
+      disconnect();
+    };
+  }, [user, hasLoaded]);
 
   const loadData = async () => {
     try {
@@ -141,12 +143,8 @@ export default function Dashboard() {
     setSelectedInvoice(invoiceId);
   };
 
-  console.log(user.name);
-
   return (
     <div className="flex h-screen bg-gray-50 flex-col md:flex-row">
-      {/* <Sidebar className="w-full md:w-64" /> */}
-
       <div
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 md:static md:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -176,7 +174,7 @@ export default function Dashboard() {
 
               <div className="flex justify-center items-center gap-1 px-2 py-1 md:p-2 rounded-full">
                 <Avatar className="h-8 w-8 md:h-10 md:w-10 bg-blue-600">
-                  <AvatarImage src={user.avata} />
+                  <AvatarImage src={user.avatar} />
                   <AvatarFallback
                     className={"bg-blue-600 text-white font-bold p-1"}
                   >
@@ -241,7 +239,9 @@ export default function Dashboard() {
                               Total Paid
                             </h3>
                             <p className="text-[10px] md:text-xs text-gray-500 !bg-[#b6fdd2] rounded-2xl py-1 px-2">
-                              {stats?.overdue.count.toString().padStart(2, "0")}
+                              {stats?.overdue?.count
+                                ?.toString()
+                                .padStart(2, "0") || "00"}
                             </p>
                           </div>
                         </div>
